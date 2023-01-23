@@ -1,5 +1,6 @@
 import telebot
 import os
+from Gsheet import spreadsheet
 
 
 API_KEY = os.getenv("API_KEY")
@@ -9,8 +10,14 @@ bot = telebot.TeleBot(API_KEY)
 @bot.message_handler(commands=['friends'])
 def names(message):
   names = message.text.split('\n')[1:]
-  print(names)
-  bot.reply_to(message, 'Friends of ... hangout were recorded')
+  template_id = spreadsheet.worksheet("Template").id
+  new_sheet_i = len(spreadsheet._spreadsheets_get()['sheets'])
+  event = spreadsheet.duplicate_sheet(template_id, insert_sheet_index=new_sheet_i, new_sheet_name=names[0])
+  i = 2
+  for name in names[1:]:
+    event.update_cell(i, 1, name)
+    i += 1
+  bot.reply_to(message, 'دورهمي جديد و اسامي دوستان ثبت شد')
 
 
 @bot.message_handler(commands=['pay'])
