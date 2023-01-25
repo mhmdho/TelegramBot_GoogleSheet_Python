@@ -93,4 +93,13 @@ def record_payment(message):
   # bot.send_message(message.chat.id, f'{user} paid {pay}$ for {event_name}')
 
 
+@bot.message_handler(commands=['bill'])
+def bill_total_amount(message):
+  event_name = message.text.split('\n')[1]
+  total_amount = message.text.split('\n')[2]
+  event = spreadsheet.worksheet(event_name)
+  event.update_cell(2, 4, total_amount)
+  bot.reply_to(message, f'مبلغ فاکتور ({event_name}) ثبت شد')
+
+
 bot.polling()
