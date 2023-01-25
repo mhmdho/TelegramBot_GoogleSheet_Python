@@ -25,6 +25,22 @@ def names(message):
   bot.reply_to(message, f'دورهمي ({names[0]}) و اسامي دوستان ثبت شد')
 
 
+@bot.message_handler(commands=['addfriends'])
+def add_names(message):
+  names = message.text.split('\n')[1:]
+  event = spreadsheet.worksheet(names[0])
+  old_names = event.col_values(1)
+  i = len(old_names) + 1
+  print(i)
+  print(event.col_values(1))
+  for name in names[1:]:
+    if name not in old_names:
+      event.update_cell(i, 1, name)
+      event.update_cell(i, 2, 0)
+      i += 1
+  bot.reply_to(message, f'در دورهمي ({names[0]}) اسامي جديد ثبت شد')
+
+
 @bot.message_handler(commands=['pay'])
 def payment(message):
   event = message.text.split('\n')[1]
