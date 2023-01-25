@@ -58,8 +58,12 @@ def get_report(message):
   footer = f"\n مانده واريز نشده: {event.cell(2, 6).value}" 
   response = ""
   for i in range(len(names)):
-    d = 40 - len(names[i])
-    response += f"{names[i] : <20}{payments[i] : >{d}}\n"
+    if payments[i] == '0':
+      name = names[i]
+    else:
+      name = names[i][1:]
+    d = 40 - len(name)
+    response += f"{name : <20}{payments[i] : >{d}}\n"
   data = title + response + footer
   bot.send_message(message.chat.id, data)
 
