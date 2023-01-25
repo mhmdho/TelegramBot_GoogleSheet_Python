@@ -52,14 +52,13 @@ def payment(message):
 
 @bot.message_handler(commands=['report'])
 def get_report(message):
+  names = event.col_values(1)
+  payments = event.col_values(2)
   title = f"{event.title}\n\n"
-  col = f"{'name' : <20}{'payment' : ^30}\n"
   response = ""
-  i = 2
-  while event.cell(i, 1).value != None:
-    response += f"{event.cell(i,1).value : <20}{event.cell(i,2).value : ^30}\n"
-    i += 1
-  data = title + col + response
+  for i in range(len(names)):
+    response += f"{names[i] : <20}{payments[i] : ^30}\n"
+  data = title + response
   bot.send_message(message.chat.id, data)
 
 
