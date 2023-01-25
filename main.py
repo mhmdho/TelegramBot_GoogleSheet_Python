@@ -55,10 +55,12 @@ def get_report(message):
   names = event.col_values(1)
   payments = event.col_values(2)
   title = f"{event.title}\n\n"
+  footer = f"\n مانده واريز نشده: {event.cell(2, 6).value}" 
   response = ""
   for i in range(len(names)):
-    response += f"{names[i] : <20}{payments[i] : ^30}\n"
-  data = title + response
+    d = 40 - len(names[i])
+    response += f"{names[i] : <20}{payments[i] : >{d}}\n"
+  data = title + response + footer
   bot.send_message(message.chat.id, data)
 
 
