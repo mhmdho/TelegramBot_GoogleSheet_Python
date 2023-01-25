@@ -2,7 +2,6 @@ import telebot
 import os
 from Gsheet import spreadsheet
 
-
 API_KEY = os.getenv("API_KEY")
 bot = telebot.TeleBot(API_KEY)
 
@@ -15,7 +14,9 @@ def names(message):
   template_id = spreadsheet.worksheet("Template").id
   new_sheet_i = len(spreadsheet.worksheets())
   global event
-  event = spreadsheet.duplicate_sheet(template_id, insert_sheet_index=new_sheet_i, new_sheet_name=names[0])
+  event = spreadsheet.duplicate_sheet(template_id,
+                                      insert_sheet_index=new_sheet_i,
+                                      new_sheet_name=names[0])
   i = 2
   for name in names[1:]:
     event.update_cell(i, 1, name)
@@ -36,11 +37,11 @@ def payment(message):
 @bot.message_handler(commands=['report'])
 def get_report(message):
   title = f"{event.title}\n\n"
-  col = f"{'name' : <20}{'payment' : ^10}\n"
+  col = f"{'name' : <20}{'payment' : ^30}\n"
   response = ""
   i = 2
-  while event.cell(i,1).value != None:
-    response += f"{event.cell(i,1).value : <20}{event.cell(i,2).value : ^10}\n"
+  while event.cell(i, 1).value != None:
+    response += f"{event.cell(i,1).value : <20}{event.cell(i,2).value : ^30}\n"
     i += 1
   data = title + col + response
   bot.send_message(message.chat.id, data)
@@ -53,13 +54,27 @@ def recieve_payment(message):
   else:
     return True
 
+
 @bot.message_handler(func=recieve_payment)
 def record_payment(message):
-  event = message.text.split('/')[0]
+  event_name = message.text.split('/')[0]
   user = message.text.split('/')[1]
-  payment = message.text.split('/')[2]
-  bot.send_message(message.chat.id, f'{user} paid {payment}$ for {event}')
-  # bot.send_message(message.chat.id, f' مبلغ {payment} تومان توسط {user} بابت دورهمی {event} پرداخت شد')
+  pay = message.text.split('/')[2]
+  i = 2
+  while event.cell(i, 1).value != None:
+    if event.cell(i, 1).value == user:
+      event.update_cell(i, 2, pay)
+      print(user)
+      print(event.cell(i, 1).value)
+      bot.send_message(
+        message.chat.id,
+        f' مبلغ {pay} تومان توسط {user} بابت دورهمی {event_name} پرداخت شد')
+      break
+    i += 1
+  else:
+    bot.send_message(message.chat.id,
+                     f'اين نام ({user}) در اين دورهمي ثبت نشده است')
+  # bot.send_message(message.chat.id, f'{user} paid {pay}$ for {event_name}')
 
 
 bot.polling()
