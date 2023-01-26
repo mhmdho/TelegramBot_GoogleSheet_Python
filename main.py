@@ -19,7 +19,7 @@ def names(message):
                                       new_sheet_name=names[0])
   i = 2
   for name in names[1:]:
-    event.update_cell(i, 1, name)
+    event.update_cell(i, 1, name.strip())
     event.update_cell(i, 2, 0)
     i += 1
   bot.reply_to(message, f'دورهمي ({names[0]}) و اسامي دوستان ثبت شد')
@@ -28,12 +28,11 @@ def names(message):
 @bot.message_handler(commands=['addfriends'])
 def add_names(message):
   names = message.text.split('\n')[1:]
-  event = spreadsheet.worksheet(names[0])
+  event = spreadsheet.worksheet(names[0].strip())
   old_names = event.col_values(1)
   i = len(old_names) + 1
-  print(i)
-  print(event.col_values(1))
   for name in names[1:]:
+    name = name.strip()
     if name not in old_names:
       event.update_cell(i, 1, name)
       event.update_cell(i, 2, 0)
@@ -43,11 +42,22 @@ def add_names(message):
 
 @bot.message_handler(commands=['pay'])
 def payment(message):
-  event = message.text.split('\n')[1]
-  user = message.text.split('\n')[2]
-  payment = message.text.split('\n')[3]
-  bot.send_message(message.chat.id, f'{user} paid {payment}$ for {event}')
-  # bot.send_message(message.chat.id, f' مبلغ {payment} تومان توسط {user} بابت دورهمی {event} پرداخت شد')
+  event_name = message.text.split('\n')[1].strip()
+  user = message.text.split('\n')[2].strip()
+  pay = message.text.split('\n')[3].strip()
+  i = 2
+  while event.cell(i, 1).value != None:
+    if event.cell(i, 1).value == user:
+      event.update_cell(i, 2, pay)
+      bot.send_message(
+        message.chat.id,
+        f' مبلغ {pay} تومان توسط {user} بابت دورهمی {event_name} پرداخت شد')
+        # f'{user} paid {pay}$ for {event}')
+      break
+    i += 1
+  else:
+    bot.send_message(message.chat.id,
+                     f'اين نام ({user}) در اين دورهمي ثبت نشده است')
 
 
 @bot.message_handler(commands=['report'])
@@ -79,29 +89,27 @@ def recieve_payment(message):
 
 @bot.message_handler(func=recieve_payment)
 def record_payment(message):
-  event_name = message.text.split('/')[0]
-  user = message.text.split('/')[1]
-  pay = message.text.split('/')[2]
+  event_name = message.text.split('/')[0].strip()
+  user = message.text.split('/')[1].strip()
+  pay = message.text.split('/')[2].strip()
   i = 2
   while event.cell(i, 1).value != None:
     if event.cell(i, 1).value == user:
       event.update_cell(i, 2, pay)
-      print(user)
-      print(event.cell(i, 1).value)
       bot.send_message(
         message.chat.id,
         f' مبلغ {pay} تومان توسط {user} بابت دورهمی {event_name} پرداخت شد')
+        # f'{user} paid {pay}$ for {event_name}')
       break
     i += 1
   else:
     bot.send_message(message.chat.id,
                      f'اين نام ({user}) در اين دورهمي ثبت نشده است')
-  # bot.send_message(message.chat.id, f'{user} paid {pay}$ for {event_name}')
 
 
 @bot.message_handler(commands=['bill'])
 def bill_total_amount(message):
-  event_name = message.text.split('\n')[1]
+  event_name = message.text.split('\n')[1].strip()
   total_amount = message.text.split('\n')[2]
   event = spreadsheet.worksheet(event_name)
   event.update_cell(2, 4, total_amount)
