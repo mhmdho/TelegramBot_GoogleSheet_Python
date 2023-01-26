@@ -55,9 +55,10 @@ def get_report(message):
   names = event.col_values(1)
   payments = event.col_values(2)
   title = f"{event.title}\n\n"
-  footer = f"\n مانده واريز نشده: {event.cell(2, 6).value}" 
-  response = ""
-  for i in range(len(names)):
+  footer = f"\n\n مانده واريز نشده: {event.cell(2, 6).value}" 
+  response = f"{names[0] : <20}{payments[0] : >30}\n"
+  response += f"{'-----------': <20}{'----------------' : >42}\n"
+  for i in range(1, len(names)):
     if payments[i] == '0':
       name = names[i]
     else:
