@@ -8,6 +8,11 @@ bot = telebot.TeleBot(API_KEY)
 event = spreadsheet.worksheets()[-1]
 
 
+def auth(id):
+  if id == int(event.cell(1, 3).value):
+    return True
+
+
 @bot.message_handler(commands=['friends'])
 def names(message):
   names = message.text.split('\n')[1:]
@@ -22,6 +27,7 @@ def names(message):
     event.update_cell(i, 1, name.strip())
     event.update_cell(i, 2, 0)
     i += 1
+  event.update_cell(1, 3, message.chat.id)
   bot.reply_to(message, f'دورهمي ({names[0]}) و اسامي دوستان ثبت شد')
 
 
@@ -62,21 +68,24 @@ def payment(message):
 
 @bot.message_handler(commands=['report'])
 def get_report(message):
-  names = event.col_values(1)
-  payments = event.col_values(2)
-  title = f"{event.title}\n\n"
-  footer = f"\n\n مانده واريز نشده: {event.cell(2, 6).value}" 
-  response = f"{names[0] : <20}{payments[0] : >30}\n"
-  response += f"{'-----------': <20}{'----------------' : >42}\n"
-  for i in range(1, len(names)):
-    if payments[i] == '0':
-      name = names[i]
-    else:
-      name = names[i][1:]
-    d = 40 - len(name)
-    response += f"{name : <20}{payments[i] : >{d}}\n"
-  data = title + response + footer
-  bot.send_message(message.chat.id, data)
+  if auth(message.chat.id):
+    names = event.col_values(1)
+    payments = event.col_values(2)
+    title = f"{event.title}\n\n"
+    footer = f"\n\n مانده واريز نشده: {event.cell(2, 6).value}" 
+    response = f"{names[0] : <20}{payments[0] : >30}\n"
+    response += f"{'-----------': <20}{'----------------' : >42}\n"
+    for i in range(1, len(names)):
+      if payments[i] == '0':
+        name = names[i]
+      else:
+        name = names[i][1:]
+      d = 35 - len(name)
+      response += f"{name : <20}{payments[i] : >{d}}\n"
+    data = title + response + footer
+    bot.send_message(message.chat.id, data)
+  else:
+    bot.send_message(message.chat.id, "Xاين گزارش براي اين گروه نميباشدX")
 
 
 def recieve_payment(message):
