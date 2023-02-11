@@ -68,7 +68,17 @@ def payment(message):
 
 @bot.message_handler(commands=['report'])
 def get_report(message):
-  if auth(message.chat.id):
+  input_message = message.text.split()
+  if len(input_message) > 1:
+    event_name = input_message[1].strip()
+    try:
+      event = spreadsheet.worksheet(event_name)
+    except:
+      return bot.reply_to(message, "نام وارد شده اشتباه است! اين گزارش وجود ندارد.")
+  else:
+    event = spreadsheet.worksheets()[-1]
+  # if auth(message.chat.id):
+  if True:
     names = event.col_values(1)
     payments = event.col_values(2)
     title = f"{event.title}\n\n"
