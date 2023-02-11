@@ -57,7 +57,7 @@ def payment(message):
       event.update_cell(i, 2, pay)
       bot.send_message(
         message.chat.id,
-        f' مبلغ {pay} تومان توسط {user} بابت دورهمی {event_name} پرداخت شد')
+        f' مبلغ {pay} تومان توسط {user} بابت {event_name} پرداخت شد')
         # f'{user} paid {pay}$ for {event}')
       break
     i += 1
@@ -72,20 +72,28 @@ def get_report(message):
     names = event.col_values(1)
     payments = event.col_values(2)
     title = f"{event.title}\n\n"
-    footer = f"\n\n مانده واريز نشده: {event.cell(2, 6).value}" 
+    title2 = f"\n[مبالغ واريز شده]"
+    title3 = f"\n\n\n[مانده واريزي ها]"
+    footer = f"\n\n مانده واريز نشده: {event.cell(2, 6).value}"
+    card = f"{event.cell(4, 6).value}\n{event.cell(5, 6).value}"
+    seperator = "\n"+"-\t"*33+"\n"
     response = f"{names[0] : <20}{payments[0] : >30}\n"
-    response += f"{'-----------': <20}{'----------------' : >42}\n"
+    response += f"{'-----------': <20}{'----------------' : >42}"
+    response0 = ''
     for i in range(1, len(names)):
       if payments[i] == '0':
         name = names[i]
+        d = 35 - len(name)
+        response0 += f"{name : <20}{payments[i] : >{d}}\n"
       else:
-        name = names[i][1:]
-      d = 35 - len(name)
-      response += f"{name : <20}{payments[i] : >{d}}\n"
-    data = title + response + footer
+        name = '_'+names[i]
+        d = 35 - len(name)
+        response += f"\n{name : <20}{payments[i] : >{d}}"
+    data = title + title2 + seperator + response + seperator + title3 + \
+          seperator + response0 + footer + seperator + card + seperator
     bot.send_message(message.chat.id, data)
   else:
-    bot.send_message(message.chat.id, "Xاين گزارش براي اين گروه نميباشدX")
+    bot.send_message(message.chat.id, "X اين گزارش براي اين گروه نميباشد X")
 
 
 def recieve_payment(message):
