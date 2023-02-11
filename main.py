@@ -14,7 +14,7 @@ def auth(id):
 
 
 @bot.message_handler(commands=['event'])
-def names(message):
+def create_event(message):
   names = message.text.split('\n')[1:]
   template_id = spreadsheet.worksheet("Template").id
   new_sheet_i = len(spreadsheet.worksheets())
@@ -32,7 +32,7 @@ def names(message):
 
 
 @bot.message_handler(commands=['addmember'])
-def add_names(message):
+def add_member(message):
   names = message.text.split('\n')[1:]
   event = spreadsheet.worksheet(names[0].strip())
   old_names = event.col_values(1)
@@ -77,8 +77,7 @@ def get_report(message):
       return bot.reply_to(message, "نام وارد شده اشتباه است! اين گزارش وجود ندارد.")
   else:
     event = spreadsheet.worksheets()[-1]
-  # if auth(message.chat.id):
-  if True:
+  if auth(message.chat.id):
     names = event.col_values(1)
     payments = event.col_values(2)
     title = f"{event.title}\n\n"
@@ -108,32 +107,31 @@ def get_report(message):
     bot.send_message(message.chat.id, "X اين گزارش براي اين گروه نميباشد X")
 
 
-def recieve_payment(message):
-  payment = message.text.split('/')
-  if len(payment) < 3:
-    return False
-  else:
-    return True
+# def recieve_payment(message):
+#   payment = message.text.split('/')
+#   if len(payment) < 3:
+#     return False
+#   else:
+#     return True
 
-
-@bot.message_handler(func=recieve_payment)
-def record_payment(message):
-  event_name = message.text.split('/')[0].strip()
-  user = message.text.split('/')[1].strip()
-  pay = message.text.split('/')[2].strip()
-  i = 2
-  while event.cell(i, 1).value != None:
-    if event.cell(i, 1).value == user:
-      event.update_cell(i, 2, pay)
-      bot.send_message(
-        message.chat.id,
-        f' مبلغ {pay} تومان توسط {user} بابت {event_name} پرداخت شد')
-        # f'{user} paid {pay}$ for {event_name}')
-      break
-    i += 1
-  else:
-    bot.send_message(message.chat.id,
-                     f'اين نام ({user}) در اين دورهمي ثبت نشده است')
+# @bot.message_handler(func=recieve_payment)
+# def record_payment(message):
+#   event_name = message.text.split('/')[0].strip()
+#   user = message.text.split('/')[1].strip()
+#   pay = message.text.split('/')[2].strip()
+#   i = 2
+#   while event.cell(i, 1).value != None:
+#     if event.cell(i, 1).value == user:
+#       event.update_cell(i, 2, pay)
+#       bot.send_message(
+#         message.chat.id,
+#         f' مبلغ {pay} تومان توسط {user} بابت {event_name} پرداخت شد')
+#         # f'{user} paid {pay}$ for {event_name}')
+#       break
+#     i += 1
+#   else:
+#     bot.send_message(message.chat.id,
+#                      f'اين نام ({user}) در اين دورهمي ثبت نشده است')
 
 
 @bot.message_handler(commands=['billamount'])
@@ -154,6 +152,15 @@ def bill_card(message):
   event.update_cell(4, 6, card_owner)
   event.update_cell(5, 6, card_number)
   bot.reply_to(message, f'اطلاعات کارت براي ({event_name}) ثبت شد')
+
+
+@bot.message_handler(commands=['bill'])
+def bill_link(message):
+  event_name = message.text.split('\n')[1].strip()
+  link = message.text.split('\n')[2]
+  event = spreadsheet.worksheet(event_name)
+  event.update_cell(5, 5, link)
+  bot.reply_to(message, f'لينک فاکتور ({event_name}) ثبت شد')
 
 
 bot.polling()
