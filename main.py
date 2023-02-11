@@ -13,7 +13,7 @@ def auth(id):
     return True
 
 
-@bot.message_handler(commands=['friends'])
+@bot.message_handler(commands=['event'])
 def names(message):
   names = message.text.split('\n')[1:]
   template_id = spreadsheet.worksheet("Template").id
@@ -28,10 +28,10 @@ def names(message):
     event.update_cell(i, 2, 0)
     i += 1
   event.update_cell(1, 3, message.chat.id)
-  bot.reply_to(message, f'دورهمي ({names[0]}) و اسامي دوستان ثبت شد')
+  bot.reply_to(message, f' ({names[0]}) و اسامي دوستان ثبت شد')
 
 
-@bot.message_handler(commands=['addfriends'])
+@bot.message_handler(commands=['addmember'])
 def add_names(message):
   names = message.text.split('\n')[1:]
   event = spreadsheet.worksheet(names[0].strip())
@@ -43,7 +43,7 @@ def add_names(message):
       event.update_cell(i, 1, name)
       event.update_cell(i, 2, 0)
       i += 1
-  bot.reply_to(message, f'در دورهمي ({names[0]}) اسامي جديد ثبت شد')
+  bot.reply_to(message, f'اسامي جديد به ({names[0]}) اضافه شد')
 
 
 @bot.message_handler(commands=['pay'])
@@ -117,7 +117,7 @@ def record_payment(message):
       event.update_cell(i, 2, pay)
       bot.send_message(
         message.chat.id,
-        f' مبلغ {pay} تومان توسط {user} بابت دورهمی {event_name} پرداخت شد')
+        f' مبلغ {pay} تومان توسط {user} بابت {event_name} پرداخت شد')
         # f'{user} paid {pay}$ for {event_name}')
       break
     i += 1
@@ -132,7 +132,7 @@ def bill_total_amount(message):
   total_amount = message.text.split('\n')[2]
   event = spreadsheet.worksheet(event_name)
   event.update_cell(2, 4, total_amount)
-  bot.reply_to(message, f'مبلغ فاکتور ({event_name}) ثبت شد')
+  bot.reply_to(message, f'مبلغ کل ({event_name}) ثبت شد')
 
 
 bot.polling()
