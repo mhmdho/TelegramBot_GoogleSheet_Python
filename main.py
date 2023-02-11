@@ -136,13 +136,24 @@ def record_payment(message):
                      f'اين نام ({user}) در اين دورهمي ثبت نشده است')
 
 
-@bot.message_handler(commands=['bill'])
+@bot.message_handler(commands=['billamount'])
 def bill_total_amount(message):
   event_name = message.text.split('\n')[1].strip()
   total_amount = message.text.split('\n')[2]
   event = spreadsheet.worksheet(event_name)
   event.update_cell(2, 4, total_amount)
   bot.reply_to(message, f'مبلغ کل ({event_name}) ثبت شد')
+
+
+@bot.message_handler(commands=['billcard'])
+def bill_card(message):
+  event_name = message.text.split('\n')[1].strip()
+  card_owner = message.text.split('\n')[2]
+  card_number = message.text.split('\n')[3]
+  event = spreadsheet.worksheet(event_name)
+  event.update_cell(4, 6, card_owner)
+  event.update_cell(5, 6, card_number)
+  bot.reply_to(message, f'اطلاعات کارت براي ({event_name}) ثبت شد')
 
 
 bot.polling()
