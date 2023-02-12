@@ -1,14 +1,8 @@
-import telebot
-import os
+from Tbot import bot
 from Gsheet import spreadsheet
 
-API_KEY = os.getenv("API_KEY")
-bot = telebot.TeleBot(API_KEY)
 
-event = spreadsheet.worksheets()[-1]
-
-
-def auth(id):
+def auth(id, event):
   if id == int(event.cell(1, 3).value):
     return True
 
@@ -28,7 +22,7 @@ def create_event(message):
     event.update_cell(i, 2, 0)
     i += 1
   event.update_cell(1, 3, message.chat.id)
-  bot.reply_to(message, f' ({names[0]}) و اسامي دوستان ثبت شد')
+  bot.reply_to(message, f' ({names[0]}) ايجاد و اسامي ثبت شد')
 
 
 @bot.message_handler(commands=['addmember'])
@@ -77,7 +71,7 @@ def get_report(message):
       return bot.reply_to(message, "نام وارد شده اشتباه است! اين گزارش وجود ندارد.")
   else:
     event = spreadsheet.worksheets()[-1]
-  if auth(message.chat.id):
+  if auth(message.chat.id, event):
     names = event.col_values(1)
     payments = event.col_values(2)
     title = f"{event.title}\n\n"
