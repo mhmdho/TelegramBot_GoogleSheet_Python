@@ -43,6 +43,7 @@ def add_member(message):
 @bot.message_handler(commands=['pay'])
 def payment(message):
   event_name = message.text.split('\n')[1].strip()
+  event = spreadsheet.worksheet(event_name)
   user = message.text.split('\n')[2].strip()
   pay = message.text.split('\n')[3].strip()
   i = 2
@@ -59,6 +60,30 @@ def payment(message):
     bot.send_message(message.chat.id,
                      f'اين نام ({user}) در اين دورهمي ثبت نشده است')
 
+
+@bot.message_handler(commands=['pays'])
+def multi_payment(message):
+  input_message = message.text.split('\n')
+  event_name = input_message[1].strip()
+  event = spreadsheet.worksheet(event_name)
+  for item in input_message[2:]:
+    print(item)
+    user = item.split('/')[0].strip()
+    pay = item.split('/')[1].strip()
+    i = 2
+    while event.cell(i, 1).value != None:
+      if event.cell(i, 1).value == user:
+        event.update_cell(i, 2, pay)
+        bot.send_message(
+          message.chat.id,
+          f' مبلغ {pay} تومان توسط {user} بابت {event_name} پرداخت شد')
+          # f'{user} paid {pay}$ for {event}')
+        break
+      i += 1
+    else:
+      bot.send_message(message.chat.id,
+                       f'اين نام ({user}) در اين دورهمي ثبت نشده است')
+  
 
 @bot.message_handler(commands=['report'])
 def get_report(message):
