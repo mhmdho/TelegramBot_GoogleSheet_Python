@@ -98,13 +98,14 @@ def get_report(message):
     event = spreadsheet.worksheets()[-1]
   if auth(message.chat.id, event):
     names = event.col_values(1)
-    payments = event.col_values(2)
+    payments = event.range(1, 2, len(names), 2)
+    payments = [i.value for i in payments]
     title = f"{event.title}\n\n"
-    title2 = f"\n[مبالغ واريز شده]"
-    title3 = f"\n\n\n[مانده واريزي ها]"
+    title2 = "\n[مبالغ واريز شده]"
+    title3 = "\n\n\n[مانده واريزي ها]"
     footer = f"\n\n مانده واريز نشده: {event.cell(2, 6).value}"
-    card = f"{event.cell(4, 6).value}\n`{event.cell(5, 6).value}`"
-    bill = f"{event.cell(4, 5).value}\n{event.cell(5, 5).value}"
+    card = f"{event.cell(4, 6).value}\n💳 `{event.cell(5, 6).value}`"
+    bill = f"{event.cell(4, 5).value}\n🧾 {event.cell(5, 5).value}"
     seperator = "\n"+"-\t"*33+"\n"
     response = f"{names[0] : <20}{payments[0] : >30}\n"
     response += f"{'-----------': <20}{'----------------' : >42}"
@@ -112,15 +113,16 @@ def get_report(message):
     for i in range(1, len(names)):
       if payments[i] == '0':
         name = names[i]
-        d = 35 - len(name)
-        response0 += f"{name : <20}{payments[i] : >{d}}\n"
+        d = 32 - len(name)
+        response0 += f"🔴 {name : <19}{payments[i] : >{d}}\n"
       else:
         name = '_'+names[i]
-        d = 35 - len(name)
-        response += f"\n{name : <20}{payments[i] : >{d}}"
+        d = 32 - len(name)
+        response += f"\n✅ {name : <19}{payments[i] : >{d}}"
     data = title + title2 + seperator + response + seperator + title3 + \
           seperator + response0 + footer + seperator + card + seperator + \
           bill
+    data = data.replace("_", "\\_").replace("[", "\\[")
     bot.send_message(message.chat.id, data, parse_mode='MARKDOWN')
   else:
     bot.send_message(message.chat.id, "X اين گزارش براي اين گروه نميباشد X")
