@@ -103,7 +103,7 @@ def get_report(message):
     title2 = f"\n[مبالغ واريز شده]"
     title3 = f"\n\n\n[مانده واريزي ها]"
     footer = f"\n\n مانده واريز نشده: {event.cell(2, 6).value}"
-    card = f"{event.cell(4, 6).value}\n{event.cell(5, 6).value}"
+    card = f"{event.cell(4, 6).value}\n`{event.cell(5, 6).value}`"
     bill = f"{event.cell(4, 5).value}\n{event.cell(5, 5).value}"
     seperator = "\n"+"-\t"*33+"\n"
     response = f"{names[0] : <20}{payments[0] : >30}\n"
@@ -121,7 +121,7 @@ def get_report(message):
     data = title + title2 + seperator + response + seperator + title3 + \
           seperator + response0 + footer + seperator + card + seperator + \
           bill
-    bot.send_message(message.chat.id, data)
+    bot.send_message(message.chat.id, data, parse_mode='MARKDOWN')
   else:
     bot.send_message(message.chat.id, "X اين گزارش براي اين گروه نميباشد X")
 
