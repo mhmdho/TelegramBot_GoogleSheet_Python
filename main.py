@@ -20,6 +20,8 @@ def create_event(message):
   for name in names[1:]:
     event.update_cell(i, 1, name.strip())
     event.update_cell(i, 2, 0)
+    if message.entities[i].user:
+      event.update_cell(i, 3, message.entities[i].user.id)
     i += 1
   event.update_cell(1, 3, message.chat.id)
   bot.reply_to(message, f' ({names[0]}) ايجاد و اسامي ثبت شد')
@@ -31,12 +33,16 @@ def add_member(message):
   event = spreadsheet.worksheet(names[0].strip())
   old_names = event.col_values(1)
   i = len(old_names) + 1
+  j = 2
   for name in names[1:]:
     name = name.strip()
     if name not in old_names:
       event.update_cell(i, 1, name)
       event.update_cell(i, 2, 0)
+      if message.entities[j].user:
+        event.update_cell(i, 3, message.entities[j].user.id)
       i += 1
+    j +=1
   bot.reply_to(message, f'اسامي جديد به ({names[0]}) اضافه شد')
 
 
@@ -101,8 +107,8 @@ def get_report(message):
     payments = event.range(1, 2, len(names), 2)
     payments = [i.value for i in payments]
     title = f"{event.title}\n\n"
-    title2 = "\n[مبالغ واريز شده]"
-    title3 = "\n\n\n[مانده واريزي ها]"
+    title2 = "\n مبالغ واريز شده "
+    title3 = "\n\n\n مانده واريزي ها "
     footer = f"\n\n مانده واريز نشده: {event.cell(2, 6).value}"
     card = f"{event.cell(4, 6).value}\n💳 `{event.cell(5, 6).value}`"
     bill = f"{event.cell(4, 5).value}\n🧾 {event.cell(5, 5).value}"
@@ -114,7 +120,11 @@ def get_report(message):
       if payments[i] == '0':
         name = names[i]
         d = 32 - len(name)
-        response0 += f"🔴 {name : <19}{payments[i] : >{d}}\n"
+        if event.cell(i+1, 3).value:
+          name = f'[{name}](tg://user?id={event.cell(i+1, 3).value})'
+          response0 += f"🔴 {name : <42}{payments[i] : >{d}}\n"
+        else:
+          response0 += f"🔴 {name : <19}{payments[i] : >{d}}\n"
       else:
         name = '_'+names[i]
         d = 32 - len(name)
@@ -122,7 +132,7 @@ def get_report(message):
     data = title + title2 + seperator + response + seperator + title3 + \
           seperator + response0 + footer + seperator + card + seperator + \
           bill
-    data = data.replace("_", "\\_").replace("[", "\\[")
+    data = data.replace("_", "\\_")
     bot.send_message(message.chat.id, data, parse_mode='MARKDOWN')
   else:
     bot.send_message(message.chat.id, "X اين گزارش براي اين گروه نميباشد X")
